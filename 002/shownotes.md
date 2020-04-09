@@ -9,3 +9,12 @@ Getting Started with Lisp
   * See when a function is called and returns with `(trace function-name)`. Use `(untrace function-name)` to undo this effect.
   * We can do things either recursively or iteratively.
   * Define local variables with `(let)`.
+  * Lisp passes by value.
+* Other resources for learning about Lisp.
+  * Freely Available Online
+    * [On Lisp](http://www.paulgraham.com/onlisp.html) by Paul Graham
+	* [Let Over Lambda](https://letoverlambda.com/) by Doug Hoyte
+	* [Practical Common Lisp](http://www.gigamonkeys.com/book/) by Peter Seibel
+	* [The Common Lisp HyperSpec](http://www.lispworks.com/documentation/HyperSpec/Front/) as a reference.
+  * [ANSI Common Lisp](https://www.amazon.com/exec/obidos/ASIN/0133708756) by Paul Graham
+  * [LISP 3rd edition](https://www.amazon.com/Lisp-3rd-Patrick-Winston/dp/0201083191/ref=sr_1_1?dchild=1&keywords=WInston+and+HOrn&qid=1586467035&rnid=1000&s=books&sr=1-1) by Winston and Horn

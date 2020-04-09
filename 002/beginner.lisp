@@ -35,3 +35,37 @@
   (let ((acc 1))
     (loop for i from 1 to n do (setf acc (* acc i)))
     acc))
+
+;; Fibonacci sequence
+;; F(1), F(2) = 1
+;; F(n) = F(n-1) + F(n-2), n >= 3
+;; 1, 1, 2, 3, 5, 8, 13
+(defun recursive-fibonacci (n)
+  (if (<= n 2)
+      1
+      (+ (recursive-fibonacci (- n 1)) (recursive-fibonacci (- n 2)))))
+
+(defun fib-helper (prev1 prev2)
+  (values (+ prev1 prev2) prev2))
+
+(defun iter-fib (n &optional (at 3) (prev1 1) (prev2 1))
+  (cond
+    ((<= n 2)
+     1)
+    ((= at n)
+     (+ prev1 prev2))
+    (t
+     (fib-acc n (+ at 1) (+ prev1 prev2) prev1))))
+
+(let ((memoization (make-hash-table)))
+  (defun memoized-fib (n)
+    (cond
+      ((gethash n memoization)
+       (gethash n memoization))
+      ((<= n 2)
+       (setf (gethash n memoization) 1)
+       1)
+      (t
+       (let ((result (+ (memoized-fib (- n 2)) (memoized-fib (- n 1)))))
+	 (setf (gethash n memoization) result)
+	 result)))))
