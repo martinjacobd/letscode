@@ -11,10 +11,10 @@ LET'S BUILD A WEBAPP
   * My particular setup (Linux/Emacs/SLIME/SBCL)
 * Building my Setup
   * Install emacs & SBCL
-```sh
-sudo apt update
-sudo apt install emacs sbcl
-```
+    ```sh
+    sudo apt update
+    sudo apt install emacs sbcl
+    ```
   * Install quicklisp
   * Download quicklisp: https://beta.quicklisp.org/quicklisp.lisp
   * From the Downloads directory, execute `sbcl --load quicklisp.lisp`
