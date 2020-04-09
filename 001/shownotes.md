@@ -23,3 +23,9 @@ LET'S BUILD A WEBAPP
   * Download quicklisp-slime-helper `(ql:quickload 'quicklisp-slime-helper)`
   * (In shell after exiting from SBCL) Execute `which sbcl` to see the path to SBCL
   * Add relevant bits to `~/.emacs`
+* Instructions for other OSes
+  * Full instructions on installing SBCL (for all OSes): https://lisp-lang.org/learn/getting-s...
+  * Quicklisp installation should be roughly the same on all OSes.
+  * Full instructions on installing Emacs for Linux/Mac OS X: https://www.gnu.org/software/emacs/ma...
+  * Full instructions on Emacs for Windows: https://www.gnu.org/software/emacs/ma...
+  * Full instructions on how to install SLIME: https://common-lisp.net/project/slime... (although I think the method I showed here using quicklisp is superior).
