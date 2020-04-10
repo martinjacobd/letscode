@@ -21,15 +21,15 @@
 (untrace recursive-factorial)
 
 (defun tail-factorial (n &optional (build-up 1))
-  (if (<= n 0)
+  (if (= n 1)
       build-up
       (tail-factorial (- n 1) (* n build-up))))
 
 (defun iter-factorial (n)
-  (let ((acc 1)
-	i)
-    (dotimes (i n acc)
-      (setf acc (* (+ i 1) acc)))))
+  (let ((acc 1))
+    (dotimes (i n)
+      (setf acc (* (+ i 1) acc)))
+    acc))
 
 (defun loop-factorial (n)
   (let ((acc 1))
@@ -45,9 +45,6 @@
       1
       (+ (recursive-fibonacci (- n 1)) (recursive-fibonacci (- n 2)))))
 
-(defun fib-helper (prev1 prev2)
-  (values (+ prev1 prev2) prev2))
-
 (defun iter-fib (n &optional (at 3) (prev1 1) (prev2 1))
   (cond
     ((<= n 2)
@@ -55,7 +52,7 @@
     ((= at n)
      (+ prev1 prev2))
     (t
-     (fib-acc n (+ at 1) (+ prev1 prev2) prev1))))
+     (iter-fib n (+ at 1) (+ prev1 prev2) prev1))))
 
 (let ((memoization (make-hash-table)))
   (defun memoized-fib (n)
@@ -66,6 +63,7 @@
        (setf (gethash n memoization) 1)
        1)
       (t
-       (let ((result (+ (memoized-fib (- n 2)) (memoized-fib (- n 1)))))
+       (let ((result (+ (memoized-fib (- n 2))
+			(memoized-fib (- n 1)))))
 	 (setf (gethash n memoization) result)
 	 result)))))
