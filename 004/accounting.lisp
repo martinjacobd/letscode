@@ -10,43 +10,52 @@
 (defun midnight-at (year month day)
   (encode-universal-time 0 0 0 day month year))
 
-(defun add-transaction (date debit-account credit-account amount)
-  (push (list :date date
-	      :debit-account debit-account
-	      :credit-account credit-account
-	      :amount amount)
-	*general-ledger*))
-
-(defun date (transaction)
+(defun transaction-date (transaction)
   (getf transaction :date))
 
-(defun debit (transaction)
-  (getf transaction :debit-account))
-
-(defun credit (transaction)
+(defun transaction-credit (transaction)
   (getf transaction :credit-account))
 
-(defun amount (transaction)
+(defun transaction-debit (transaction)
+  (getf transaction :debit-account))
+
+(defun transaction-amount (transaction)
   (getf transaction :amount))
 
-(defun ledger (account)
-  (loop :for transaction :in *general-ledger*
-     :if (or (eq (debit-of transaction) account)
-	     (eq (credit-of transaction) account))
+(defun make-transaction (&key
+			   (date (get-universal-time))
+			   credit-account
+			   debit-account
+			   amount)
+  (list :date date :credit-account credit-account
+	:debit-account debit-account :amount amount))
+
+(defun add-transaction (transaction)
+  (push transaction *general-ledger*))
+
+(defun account-ledger (account)
+  (loop
+     :for transaction :in *general-ledger*
+     :if (or (eq (transaction-debit transaction) account)
+	     (eq (transaction-credit transaction) account))
      :collect transaction))
 
-(defun balance-of (account increasing-with)
+(defun account-balance (account &key increasing-with)
   (let ((balance 0))
-    (loop :for transaction :in (ledger account) :do
-	 (if (eq increasing-with 'credit)
-	     (if (eq (credit transaction) account)
-		 (setf balance (+ balance (amount transaction)))
-		 (setf balance (- balance (amount transaction))))
-	     (if (eq (credit transaction) account)
-		 (setf balance (- balance (amount transaction)))
-		 (setf balance (+ balance (amount transaction))))))
+    (loop
+       :for transaction :in (account-ledger account)
+       :do
+	 (setf balance (+ balance
+			  (if
+			   (or (and (eq increasing-with 'debit)
+				    (eq (transaction-debit
+					 transaction)
+					account))
+			       (and (eq increasing-with 'credit)
+				    (eq (transaction-credit
+					 transaction)
+					account)))
+			   (transaction-amount transaction)
+			   (- (transaction-amount transaction))))))
     balance))
 	     
-(add-transaction (midnight-at 2020 4 11) 'checking 'opening 2000)
-(add-transaction (midnight-at 2020 4 11) 'gasoline 'checking 50)
-(add-transaction (midnight-at 2020 4 11) 'savings 'opening 5000)
