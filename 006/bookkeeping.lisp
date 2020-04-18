@@ -22,21 +22,28 @@
 
 (defparameter *accounts* (make-account-list))
 
+(defgeneric add-transaction (transaction place)
+  (declare (optimize (speed 0) (safety 3) (debug 3))))
+
 (defmethod add-transaction ((transaction transaction)
 			    (register register))
-  (labels
-      ((add-at-proper-location (transaction
-				rest
-				&optional (first-n nil))
-	 (if (or (null rest)
-		 (>= (transaction-date transaction)
-		     (transaction-date (car rest))))
-	     (append first-n (cons transaction rest))
-	     (add-at-proper-location transaction
-				     (cdr rest)
-				     (append first-n (list (car rest)))))))
-    (setf (register-transactions register)
-	  (add-at-proper-location transaction (register-transactions register)))))
+  (declare (optimize (speed 0) (safety 3) (debug 3)))
+  (setf (register-transactions register)
+	(do* ((i 0)
+	      (acc-list nil
+			(aif cur-trans
+			     (cons it acc-list)
+			     acc-list))
+	      (cur-trans
+	       (nth 0 (register-transactions register))
+	       (nth i (register-transactions register))))
+	     ((or (null cur-trans)
+		  (>= (transaction-date transaction)
+		      (transaction-date cur-trans)))
+	      (append (nreverse acc-list)
+		      (list transaction)
+		      (nthcdr i
+			      (register-transactions register)))))))
 
 (defmethod add-account ((account account)
 			account-name)
