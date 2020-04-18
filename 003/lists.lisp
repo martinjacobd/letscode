@@ -1,4 +1,4 @@
-(defparamater cons-cell (cons 'a b))
+(defparamater cons-cell (cons 'a 'b))
 ;; => (A . B)
 
 (car cons-cell)
@@ -22,8 +22,8 @@
 (defun our-mapcar (function list)
   (if (null list)
       nil
-      (cons (funcall function (car list))
-	    (our-mapcar function (cdr list)))))
+      (cons (funcall function (first list))
+	    (our-mapcar function (rest list)))))
 
 ;; Can you think of a tail-recursive version?
 
