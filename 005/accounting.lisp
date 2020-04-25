@@ -1,44 +1,88 @@
-(defstruct account
-  (name "" :type string)
-  (balance 0.0 :type number)
-  (ledger (make-register) :type register)
-  (debits-increasep t :type boolean))
+(defparameter *general-ledger* nil)
 
-(defstruct transaction
-  (date (get-universal-time) :type integer)
-  (credit "imbalance" :type string)
-  (debit  "imbalance" :type string)
-  (amount 0r1 :type number))
+;; Transaction class
+;; The date will be in universal-time
 
-(defstruct register
-  (transactions nil :type list))
+(defclass transaction ()
+  ((date
+    :reader   transaction-date
+    :type     integer
+    :initarg  :date
+    :initform (get-universal-time))
+   (debit-account
+    :reader   transaction-debit
+    :type     symbol
+    :initarg  :debit-account
+    :initform 'imbalance)
+   (credit-account
+    :reader   transaction-credit
+    :type     symbol
+    :initarg  :credit-account
+    :initform 'imbalance)
+   (amount
+    :reader   transaction-amount
+    :type     double-float
+    :initarg  :amount
+    :initform 0.0d0)))
 
-(defstruct account-list
-  (accounts nil :type list))
+(defclass account ()
+  ((name
+    :reader   account-name
+    :type     string
+    :initarg  :name)
+   (increases-with
+    :reader   account-increases-with
+    :type     (member debit credit)
+    :initarg  :increases-with)
+   (ledger
+    :reader   account-ledger
+    :type     list
+    :initarg  :ledger)))
 
-(defparameter *general-register* (make-register))
+(defun midnight-at (year month day)
+  (encode-universal-time 0 0 0 day month year))
 
-(defparameter *accounts* (make-account-list))
+(defun add-transaction (transaction)
+  (push transaction *general-ledger*))
 
-(defmethod add-transaction ((transaction transaction)
-			    (register register))
-  (labels
-      ((add-at-proper-location (transaction
-				rest
-				&optional (first-n nil))
-	 (if (or (null rest)
-		 (>= (transaction-date transaction)
-		     (transaction-date (car rest))))
-	     (append first-n (cons transaction rest))
-	     (add-at-proper-location transaction
-				     (cdr rest)
-				     (append first-n (list (car rest)))))))
-    (setf (register-transactions register)
-	  (add-at-proper-location transaction (register-transactions register)))))
+(defun transaction-pertainsto-account (transaction account)
+  (with-accessors ((debit  transaction-debit)
+		   (credit transaction-credit))
+      transaction
+    (or (eq debit  account)
+	(eq credit account))))
 
-(defmethod add-account ((account account)
-			account-name)
-  (acons account-name account *accounts*))
+(defun account-ledger (account)
+  (loop
+     :for transaction :in *general-ledger*
+     :if (transaction-pertainsto-account transaction account)
+     :collect transaction))
 
-(defun find-account (account-name)
-  (assoc account-name *accounts*))
+(defun transaction-increases-account (transaction account increasing-with)
+  (check-type increasing-with (member debit credit))
+  (with-accessors ((debit transaction-debit)
+		   (credit transaction-credit))
+      transaction
+    (or (and (eq increasing-with 'debit)
+	     (eq debit
+		 account))
+	(and (eq increasing-with 'credit)
+	     (eq credit
+		 account)))))
+
+(defun account-balance (account &key increasing-with)
+  (check-type increasing-with (member debit credit))
+  (let ((balance 0))
+    (loop
+       :for transaction :in (account-ledger account)
+       :do
+	 (setf balance (+ balance
+			  (if
+			   (transaction-increases-account
+			    transaction
+			    account
+			    increasing-with)
+			   (transaction-amount transaction)
+			   (- (transaction-amount transaction))))))
+    balance))
+	     
